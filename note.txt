@@ -1,0 +1,18 @@
+1、【完成】创建pair的地址
+    factory合约保存了启用pairs的字节码。它的主要工作是为唯一的交易对创建唯一的智能合约。它同时也控制着开发团队招手续费收取开关。
+2、提前发送代币的交易方式。通常，代币如果通过第三方合约进行转移，需要授权后才能操作。Uniswap V2采用了一种不同的设计，不使用授权，而是在交易前需要先发送代币到交易对。交易时，合约会检查当前保存的代币余额和合约实际代币余额，以这两者之间的差额作为输入代币的数量。因此在调用交易对中任何需要代币的方法时必须先将相应数量的代币发送到交易对（除了Flash Swaps先借后还交易这个例外）
+3、前端的路由是如何获取的
+4、增强了预言机功能，减少了UniswapV1中在同一个block内价格受到操控的风险。具体做法为：在一个block的开头大量卖出某种资产A从而影响价格，在该block的中间根据这个大幅波动的价格进行其它合约的其它操作（非uniswap交易对合约），在该block的最后再买入相同数量的资产A使价格回到正常水平。UniswapV2进行了价格累计，方便第三方使用某一区间价格的平均值，大大增加了这种操纵的难度并使价格操纵并无实质收益。由于使用平均值，A/B和B/A的某一区间平均值不再是倒数关系，所以V2版本提供了这两种价格。
+5、【完成】为什么要可以预测的pair地址
+    // calculates the CREATE2 address for a pair without making any external calls
+    避免使用外部调用getPair获取合约的地址，直接通过library就可以计算出来, 可以省gas?
+6、【完成】token为什么要排序，计算pair的地址？
+    a. 内部的pair合约里的token0/token1、reserve0/reserve1都是顺序排的，两个token不管顺序，都是同一个pair
+    b. pair合约的计算
+7、【完成】swap有lock的modifier  防止重复进入函数
+8、【完成】pair合约里的下面三个参数设计在一个slot，目的是读写快速
+    uint112 private reserve0;           // uses single storage slot, accessible via getReserves
+    uint112 private reserve1;           // uses single storage slot, accessible via getReserves
+    uint32  private blockTimestampLast; // uses single storage slot, accessible via getReserves
+
+9、
