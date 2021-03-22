@@ -9,10 +9,11 @@ import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Callee.sol';
 
 contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
-    using SafeMath  for uint;
+    using SafeMath  for uint; 
     using UQ112x112 for uint224;
 
     uint public constant MINIMUM_LIQUIDITY = 10**3;
+    //用来计算标准ERC20合约中转移代币函数transfer的函数选择器。虽然标准的ERC20合约在转移代币后返回一个成功值，但有些不标准的并没有返回值。在这个合约里统一做了处理，并使用了较低级的call函数代替正常的合约调用。函数选择器用于call函数调用中。
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
     address public factory;
@@ -22,9 +23,11 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
     uint112 private reserve0;           // uses single storage slot, accessible via getReserves
     uint112 private reserve1;           // uses single storage slot, accessible via getReserves
     uint32  private blockTimestampLast; // uses single storage slot, accessible via getReserves
-
+    
+    //记录交易对中两种价格的累计值
     uint public price0CumulativeLast;
     uint public price1CumulativeLast;
+    //记录某一时刻恒定乘积中积的值，主要用于开发团队手续费计算。
     uint public kLast; // reserve0 * reserve1, as of immediately after the most recent liquidity event
 
     uint private unlocked = 1;
@@ -40,7 +43,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         _reserve1 = reserve1;
         _blockTimestampLast = blockTimestampLast;
     }
-
+    //使用call函数进行代币合约transfer的调用（使用了函数选择器）。注意，它检查了返回值（首先必须调用成功，然后无返回值或者返回值为true）
     function _safeTransfer(address token, address to, uint value) private {
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'UniswapV2: TRANSFER_FAILED');
@@ -55,7 +58,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         uint amount0Out,
         uint amount1Out,
         address indexed to
-    );
+    ); 
     event Sync(uint112 reserve0, uint112 reserve1);
 
     constructor() public {
@@ -68,7 +71,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         token0 = _token0;
         token1 = _token1;
     }
-
+    //每个区块第一个交易才执行
     // update reserves and, on the first call per block, price accumulators
     function _update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
         require(balance0 <= uint112(-1) && balance1 <= uint112(-1), 'UniswapV2: OVERFLOW');
@@ -181,7 +184,6 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
         require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'UniswapV2: K');
         }
-
         _update(balance0, balance1, _reserve0, _reserve1);
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
     }

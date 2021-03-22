@@ -15,4 +15,13 @@
     uint112 private reserve1;           // uses single storage slot, accessible via getReserves
     uint32  private blockTimestampLast; // uses single storage slot, accessible via getReserves
 
-9、
+9、【待解答】
+    UniswapV2ERC20.sol中涉及的ERC712 和 permit()函数
+    removeLiquidityWithPermit()??
+
+10. UniswapV2Pair的skim()与sync()函数什么地方使用，作用是什么？
+
+11. 为什么创建流动性pair时，需要发送0.001 lp到0x地址，详见白皮书的解释。
+
+12. 使用token支付矿工手续费
+removeLiquidityETHSupportingFeeOnTransferTokens
